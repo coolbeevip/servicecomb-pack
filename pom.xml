@@ -914,4 +914,16 @@
       </build>
     </profile>
   </profiles>
+
+  <distributionManagement>
+    <repository>
+      <id>boco-nexus-release</id>
+      <url>http://10.22.1.232/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>boco-nexus-snapshots</id>
+      <url>http://10.22.1.232/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
 </project>
