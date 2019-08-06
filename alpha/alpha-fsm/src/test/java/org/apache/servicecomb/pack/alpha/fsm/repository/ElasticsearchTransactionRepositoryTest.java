@@ -130,7 +130,7 @@ public class ElasticsearchTransactionRepositoryTest {
           .build();
       repository.send(transaction);
     }
-    await().atMost(refreshTime + 10, SECONDS).until(
+    await().atMost(refreshTime + 6, SECONDS).until(
         () -> metricsService.metrics().getRepositoryAccepted() == metricsService.metrics()
             .getRepositoryReceived());
     assertEquals(metricsService.metrics().getRepositoryAccepted(), size);
