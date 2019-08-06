@@ -172,7 +172,9 @@ public class PackStepdefs implements En {
         .when()
         .get(address)
         .then()
+        .log().all()
         .statusCode(is(200))
+        .log().all()
         .extract()
         .body()
         .as(Map[].class);
