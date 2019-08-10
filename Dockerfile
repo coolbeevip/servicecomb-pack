@@ -14,4 +14,4 @@ LABEL Description="This is an experimental image for the master branch of the Se
 
 COPY --from=builder /servicecomb-pack/alpha/alpha-server/target/saga/alpha-server-0.5.0-SNAPSHOT-exec.jar /alpha-server-0.5.0-SNAPSHOT-exec.jar
 
-CMD ["java -jar alpha-server-0.5.0-SNAPSHOT-exec.jar"]
+CMD ["java","-jar","alpha-server-0.5.0-SNAPSHOT-exec.jar"]
