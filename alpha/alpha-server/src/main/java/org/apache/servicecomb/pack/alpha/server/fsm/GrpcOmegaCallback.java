@@ -19,20 +19,27 @@ package org.apache.servicecomb.pack.alpha.server.fsm;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
+import java.lang.invoke.MethodHandles;
+import org.apache.servicecomb.pack.alpha.core.CompensateAskFailedException;
 import org.apache.servicecomb.pack.alpha.core.OmegaCallback;
+import org.apache.servicecomb.pack.alpha.core.OmegaDisconnectedException;
 import org.apache.servicecomb.pack.alpha.core.TxEvent;
 import org.apache.servicecomb.pack.contract.grpc.GrpcCompensateCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class GrpcOmegaCallback implements OmegaCallback {
 
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final StreamObserver<GrpcCompensateCommand> observer;
-
+  private CompensateAsk compensateAsk;
   GrpcOmegaCallback(StreamObserver<GrpcCompensateCommand> observer) {
     this.observer = observer;
   }
 
   @Override
   public void compensate(TxEvent event) {
+    compensateAsk = new CompensateAsk(1);
     GrpcCompensateCommand command = GrpcCompensateCommand.newBuilder()
         .setGlobalTxId(event.globalTxId())
         .setLocalTxId(event.localTxId())
@@ -41,10 +48,30 @@ class GrpcOmegaCallback implements OmegaCallback {
         .setPayloads(ByteString.copyFrom(event.payloads()))
         .build();
     observer.onNext(command);
+    try {
+      compensateAsk.await();
+      if (compensateAsk.getType() == CompensateAskType.Disconnected) {
+        throw new OmegaDisconnectedException("Omega disconnected exception");
+      }else{
+        LOG.info("compensate ask "+compensateAsk.getType().name());
+        if(compensateAsk.getType() == CompensateAskType.Failed){
+          throw new CompensateAskFailedException("omega throw exception!");
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public void disconnect() {
     observer.onCompleted();
+    if (compensateAsk != null) {
+      compensateAsk.countDown(CompensateAskType.Disconnected);
+    }
+  }
+
+  public void ask(CompensateAskType type){
+    compensateAsk.countDown(type);
   }
 }

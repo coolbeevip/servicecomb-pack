@@ -15,18 +15,10 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.common;
+package org.apache.servicecomb.pack.alpha.core;
 
-public enum EventType {
-  SagaStartedEvent,
-  TxStartedEvent,
-  TxEndedEvent,
-  TxAbortedEvent,
-  TxCompensatedEvent,
-  SagaEndedEvent,
-  SagaAbortedEvent,
-  SagaTimeoutEvent,
-  TxCompensateEvent,
-  TxCompensateFailedAckEvent,
-  TxCompensateSucceedAckEvent
+public class CompensateAskFailedException extends RuntimeException {
+  public CompensateAskFailedException(String cause) {
+    super(cause);
+  }
 }

@@ -15,18 +15,12 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.common;
+package org.apache.servicecomb.pack.omega.transaction;
 
-public enum EventType {
-  SagaStartedEvent,
-  TxStartedEvent,
-  TxEndedEvent,
-  TxAbortedEvent,
-  TxCompensatedEvent,
-  SagaEndedEvent,
-  SagaAbortedEvent,
-  SagaTimeoutEvent,
-  TxCompensateEvent,
-  TxCompensateFailedAckEvent,
-  TxCompensateSucceedAckEvent
+import org.apache.servicecomb.pack.common.EventType;
+
+public class TxCompensateSucceedAckEvent extends TxEvent {
+  public TxCompensateSucceedAckEvent(String globalTxId, String localTxId, String parentTxId) {
+    super(EventType.TxCompensateSucceedAckEvent, globalTxId, localTxId, parentTxId, "", 0, "", 0);
+  }
 }

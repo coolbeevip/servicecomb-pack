@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.servicecomb.pack.alpha.core.OmegaCallback;
+import org.apache.servicecomb.pack.alpha.core.fsm.event.TxCompensateAckEvent;
 import org.apache.servicecomb.pack.alpha.core.fsm.event.base.BaseEvent;
 import org.apache.servicecomb.pack.alpha.core.fsm.channel.ActorEventChannel;
 import org.apache.servicecomb.pack.common.EventType;
@@ -54,11 +55,32 @@ public class GrpcSagaEventService extends TxEventServiceImplBase {
   }
 
   @Override
-  public void onConnected(
-      GrpcServiceConfig request, StreamObserver<GrpcCompensateCommand> responseObserver) {
-    omegaCallbacks
-        .computeIfAbsent(request.getServiceName(), key -> new ConcurrentHashMap<>())
-        .put(request.getInstanceId(), new GrpcOmegaCallback(responseObserver));
+  public StreamObserver<GrpcServiceConfig> onConnected(StreamObserver<GrpcCompensateCommand> responseObserver) {
+    return new StreamObserver<GrpcServiceConfig>(){
+
+      private GrpcOmegaCallback grpcOmegaCallback;
+
+      @Override
+      public void onNext(GrpcServiceConfig grpcServiceConfig) {
+        grpcOmegaCallback = new GrpcOmegaCallback(responseObserver);
+        omegaCallbacks
+            .computeIfAbsent(grpcServiceConfig.getServiceName(), key -> new ConcurrentHashMap<>())
+            .put(grpcServiceConfig.getInstanceId(), grpcOmegaCallback);
+        responseObserver.onNext(GrpcCompensateCommand.newBuilder()
+            .build());
+      }
+
+      @Override
+      public void onError(Throwable throwable) {
+        grpcOmegaCallback.ask(CompensateAskType.Disconnected);
+        LOG.error(throwable.getMessage());
+      }
+
+      @Override
+      public void onCompleted() {
+        // Do nothing here
+      }
+    };
   }
 
   // TODO: 2018/1/5 connect is async and disconnect is sync, meaning callback may not be registered on disconnected
@@ -144,6 +166,28 @@ public class GrpcSagaEventService extends TxEventServiceImplBase {
           .parentTxId(message.getParentTxId())
           .createTime(new Date())
           .localTxId(message.getLocalTxId()).build();
+    } else if (message.getType().equals(EventType.TxCompensateSucceedAckEvent.name())) {
+      event = TxCompensateAckEvent.builder()
+          .succeed(true)
+          .serviceName(message.getServiceName())
+          .instanceId(message.getInstanceId())
+          .globalTxId(message.getGlobalTxId())
+          .parentTxId(message.getParentTxId())
+          .createTime(new Date())
+          .localTxId(message.getLocalTxId()).build();
+      GrpcOmegaCallback omegaCallback = (GrpcOmegaCallback)omegaCallbacks.get(message.getServiceName()).get(message.getInstanceId());
+      omegaCallback.ask(CompensateAskType.Succeed);
+    } else if (message.getType().equals(EventType.TxCompensateFailedAckEvent.name())) {
+      event = TxCompensateAckEvent.builder()
+          .succeed(false)
+          .serviceName(message.getServiceName())
+          .instanceId(message.getInstanceId())
+          .globalTxId(message.getGlobalTxId())
+          .parentTxId(message.getParentTxId())
+          .createTime(new Date())
+          .localTxId(message.getLocalTxId()).build();
+      GrpcOmegaCallback omegaCallback = (GrpcOmegaCallback)omegaCallbacks.get(message.getServiceName()).get(message.getInstanceId());
+      omegaCallback.ask(CompensateAskType.Failed);
     } else {
       ok = false;
     }

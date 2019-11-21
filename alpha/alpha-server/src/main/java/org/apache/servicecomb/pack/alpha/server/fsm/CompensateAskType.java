@@ -15,18 +15,8 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.common;
+package org.apache.servicecomb.pack.alpha.server.fsm;
 
-public enum EventType {
-  SagaStartedEvent,
-  TxStartedEvent,
-  TxEndedEvent,
-  TxAbortedEvent,
-  TxCompensatedEvent,
-  SagaEndedEvent,
-  SagaAbortedEvent,
-  SagaTimeoutEvent,
-  TxCompensateEvent,
-  TxCompensateFailedAckEvent,
-  TxCompensateSucceedAckEvent
+public enum CompensateAskType {
+  Failed,Succeed,Disconnected
 }

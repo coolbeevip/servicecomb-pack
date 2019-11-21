@@ -15,18 +15,24 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.common;
+package org.apache.servicecomb.pack.alpha.server.fsm;
 
-public enum EventType {
-  SagaStartedEvent,
-  TxStartedEvent,
-  TxEndedEvent,
-  TxAbortedEvent,
-  TxCompensatedEvent,
-  SagaEndedEvent,
-  SagaAbortedEvent,
-  SagaTimeoutEvent,
-  TxCompensateEvent,
-  TxCompensateFailedAckEvent,
-  TxCompensateSucceedAckEvent
+import java.util.concurrent.CountDownLatch;
+
+public class CompensateAsk extends CountDownLatch {
+
+  private CompensateAskType type;
+
+  public CompensateAsk(int count) {
+    super(count);
+  }
+
+  public CompensateAskType getType() {
+    return type;
+  }
+
+  public void countDown(CompensateAskType type) {
+    this.type = type;
+    super.countDown();
+  }
 }

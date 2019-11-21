@@ -54,8 +54,10 @@ public class CompositeOmegaCallback implements OmegaCallback {
 
     try {
       omegaCallback.compensate(event);
-    } catch (Exception e) {
+    } catch (OmegaDisconnectedException e) {
       serviceCallbacks.values().remove(omegaCallback);
+      throw e;
+    } catch (CompensateAskFailedException e){
       throw e;
     }
   }
