@@ -56,10 +56,27 @@ class GrpcTxEventEndpointImpl extends TxEventServiceImplBase {
   }
 
   @Override
-  public void onConnected(GrpcServiceConfig request, StreamObserver<GrpcCompensateCommand> responseObserver) {
-    omegaCallbacks
-        .computeIfAbsent(request.getServiceName(), key -> new ConcurrentHashMap<>())
-        .put(request.getInstanceId(), new GrpcOmegaCallback(responseObserver));
+  public StreamObserver<GrpcServiceConfig> onConnected(StreamObserver<GrpcCompensateCommand> responseObserver) {
+    return new StreamObserver<GrpcServiceConfig>() {
+      @Override
+      public void onNext(GrpcServiceConfig grpcServiceConfig) {
+        omegaCallbacks
+            .computeIfAbsent(grpcServiceConfig.getServiceName(), key -> new ConcurrentHashMap<>())
+            .put(grpcServiceConfig.getInstanceId(), new GrpcOmegaCallback(responseObserver));
+        responseObserver.onNext(GrpcCompensateCommand.newBuilder()
+            .build());
+      }
+
+      @Override
+      public void onError(Throwable throwable) {
+        throw new RuntimeException(throwable);
+      }
+
+      @Override
+      public void onCompleted() {
+        // Do nothing here
+      }
+    };
   }
 
   // TODO: 2018/1/5 connect is async and disconnect is sync, meaning callback may not be registered on disconnected

@@ -64,7 +64,8 @@ public class OmegaEventSender {
         .setServiceName(serviceName)
         .setInstanceId(instanceId)
         .build();
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     omegaEventSagaSimulator = OmegaEventSagaSimulator.builder().serviceName(serviceName).instanceId(instanceId).build();
 
   }

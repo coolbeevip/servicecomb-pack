@@ -180,7 +180,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void persistsEvent() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     // use the asynchronous stub need to wait for some time
     await().atMost(1, SECONDS).until(() -> !eventRepo.findByGlobalTxId(globalTxId).isEmpty());
@@ -201,7 +202,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void closeStreamOnDisconnected() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
 
     await().atMost(1, SECONDS).until(() -> omegaCallbacks.containsKey(serviceConfig.getServiceName()));
 
@@ -219,12 +221,16 @@ public class AlphaIntegrationTest {
 
   @Test
   public void closeStreamOfDisconnectedClientOnly() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     await().atMost(1, SECONDS).until(() -> omegaCallbacks.containsKey(serviceConfig.getServiceName()));
 
     GrpcServiceConfig anotherServiceConfig = someServiceConfig();
     CompensationStreamObserver anotherResponseObserver = new CompensationStreamObserver();
-    TxEventServiceGrpc.newStub(clientChannel).onConnected(anotherServiceConfig, anotherResponseObserver);
+
+    TxEventServiceStub otherAsyncStub = TxEventServiceGrpc.newStub(clientChannel);
+    StreamObserver<GrpcServiceConfig> otherServiceConfigObserver = otherAsyncStub.onConnected(anotherResponseObserver);
+    otherServiceConfigObserver.onNext(anotherServiceConfig);
 
     await().atMost(1, SECONDS).until(() -> omegaCallbacks.containsKey(anotherServiceConfig.getServiceName()));
 
@@ -241,7 +247,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void removeCallbackOnClientDown() throws Exception {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
 
@@ -254,7 +261,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void compensateImmediatelyWhenGlobalTxAlreadyAborted() throws Exception {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxAbortedEvent));
 
@@ -272,7 +280,8 @@ public class AlphaIntegrationTest {
   @Test
   public void doNotCompensateDuplicateTxOnFailure() {
     // duplicate events with same content but different timestamp
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(eventOf(TxStartedEvent, localTxId, parentTxId, "service a".getBytes(), "method a"));
     blockingStub.onTxEvent(eventOf(TxStartedEvent, localTxId, parentTxId, "service a".getBytes(), "method a"));
     blockingStub.onTxEvent(eventOf(TxEndedEvent, localTxId, parentTxId, new byte[0], "method a"));
@@ -295,7 +304,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void getCompensateCommandOnFailure() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
     await().atMost(1, SECONDS).until(() -> !eventRepo.findByGlobalTxId(globalTxId).isEmpty());
@@ -313,13 +323,16 @@ public class AlphaIntegrationTest {
 
   @Test
   public void compensateOnlyFailedGlobalTransaction() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
 
     // simulates connection from another service with different globalTxId
     GrpcServiceConfig anotherServiceConfig = someServiceConfig();
-    TxEventServiceGrpc.newStub(clientChannel).onConnected(anotherServiceConfig, new CompensationStreamObserver());
+    TxEventServiceStub otherAsyncStub =TxEventServiceGrpc.newStub(clientChannel);
+    StreamObserver<GrpcServiceConfig> otherServiceConfigObserver = otherAsyncStub.onConnected(new CompensationStreamObserver());
+    otherServiceConfigObserver.onNext(anotherServiceConfig);
 
     TxEventServiceBlockingStub anotherBlockingStub = TxEventServiceGrpc.newBlockingStub(clientChannel);
     anotherBlockingStub.onTxEvent(someGrpcEvent(TxStartedEvent, UUID.randomUUID().toString()));
@@ -337,8 +350,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void doNotStartSubTxOnFailure() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
-
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(eventOf(TxStartedEvent, localTxId, parentTxId, "service a".getBytes(), "method a"));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
 
@@ -356,7 +369,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void compensateOnlyCompletedTransactions() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
 
@@ -379,7 +393,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void sagaEndedEventIsAlwaysInTheEnd() throws Exception {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(TxStartedEvent));
     blockingStub.onTxEvent(someGrpcEvent(TxEndedEvent));
 
@@ -397,7 +412,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void abortTimeoutSagaStartedEvent() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEventWithTimeout(SagaStartedEvent, globalTxId, null, 1));
 
     await().atMost(2, SECONDS).until(() -> eventRepo.count() == 3);
@@ -420,7 +436,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void abortTimeoutTxStartedEvent() {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEvent(SagaStartedEvent, globalTxId, globalTxId, null));
     blockingStub.onTxEvent(someGrpcEventWithTimeout(TxStartedEvent, localTxId, globalTxId, 1));
 
@@ -456,7 +473,8 @@ public class AlphaIntegrationTest {
 
   @Test
   public void doNotCompensateRetryingEvents() throws InterruptedException {
-    asyncStub.onConnected(serviceConfig, compensateResponseObserver);
+    StreamObserver<GrpcServiceConfig> serviceConfigObserver = asyncStub.onConnected(compensateResponseObserver);
+    serviceConfigObserver.onNext(serviceConfig);
     blockingStub.onTxEvent(someGrpcEventWithRetry(TxStartedEvent, retryMethod, 1));
     blockingStub.onTxEvent(someGrpcEvent(TxAbortedEvent));
     blockingStub.onTxEvent(someGrpcEventWithRetry(TxStartedEvent, retryMethod, 0));
