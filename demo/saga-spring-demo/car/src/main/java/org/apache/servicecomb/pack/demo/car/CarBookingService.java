@@ -31,7 +31,7 @@ class CarBookingService {
 
   @Compensable(compensationMethod = "cancel")
   void order(CarBooking booking) {
-    if (booking.getAmount() > 10) {
+    if (booking.getAmount() > 100) {
       throw new IllegalArgumentException("can not order the cars large than ten");
     }
     booking.confirm();
@@ -39,15 +39,20 @@ class CarBookingService {
   }
 
   void cancel(CarBooking booking) {
-    Integer id = booking.getId();
-    if (bookings.containsKey(id)) {
-      bookings.get(id).cancel();
-    }
-    // Just sleep a while to ensure the Compensated event is after ordering TxAbort event
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      // Just ignore the exception
+    if (booking.getAmount() > 10) {
+      throw new RuntimeException(
+          "If cars amount is greater than 10, the order cannot be cancelled!");
+    } else {
+      Integer id = booking.getId();
+      if (bookings.containsKey(id)) {
+        bookings.get(id).cancel();
+      }
+      // Just sleep a while to ensure the Compensated event is after ordering TxAbort event
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        // Just ignore the exception
+      }
     }
   }
 
