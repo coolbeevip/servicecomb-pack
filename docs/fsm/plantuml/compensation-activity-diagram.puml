@@ -1,0 +1,11 @@
+@startuml
+start
+:开始补偿;
+if (成功?) then
+elseif (补偿失败)
+  :事务挂起;
+elseif (连接异常)
+  :事务挂起;
+endif
+stop
+@enduml
