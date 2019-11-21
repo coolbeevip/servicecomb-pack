@@ -142,9 +142,26 @@ public abstract class SagaLoadBalancedSenderTestBase {
     }
 
     @Override
-    public void onConnected(GrpcServiceConfig request, StreamObserver<GrpcCompensateCommand> responseObserver) {
+    public StreamObserver<GrpcServiceConfig> onConnected(final StreamObserver<GrpcCompensateCommand> responseObserver) {
       this.responseObserver = responseObserver;
-      connected.add("Connected " + request.getServiceName());
+      return new StreamObserver<GrpcServiceConfig>() {
+
+        @Override
+        public void onNext(GrpcServiceConfig grpcServiceConfig) {
+          connected.add("Connected " + grpcServiceConfig.getServiceName());
+          responseObserver.onNext(GrpcCompensateCommand.newBuilder().build());
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+          throw new RuntimeException(throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+          // Do nothing here
+        }
+      };
     }
 
     @Override

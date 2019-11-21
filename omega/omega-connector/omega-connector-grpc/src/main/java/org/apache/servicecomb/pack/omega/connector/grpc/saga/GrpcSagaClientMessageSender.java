@@ -19,6 +19,8 @@ package org.apache.servicecomb.pack.omega.connector.grpc.saga;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+import java.lang.invoke.MethodHandles;
 import org.apache.servicecomb.pack.contract.grpc.ServerMeta;
 import org.apache.servicecomb.pack.omega.connector.grpc.core.LoadBalanceContext;
 import org.apache.servicecomb.pack.omega.context.ServiceConfig;
@@ -35,8 +37,12 @@ import org.apache.servicecomb.pack.contract.grpc.GrpcTxEvent.Builder;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc.TxEventServiceBlockingStub;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc.TxEventServiceStub;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GrpcSagaClientMessageSender implements SagaMessageSender {
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private final String target;
 
   private final TxEventServiceStub asyncEventService;
@@ -68,12 +74,14 @@ public class GrpcSagaClientMessageSender implements SagaMessageSender {
 
   @Override
   public void onConnected() {
-    asyncEventService.onConnected(serviceConfig, compensateStreamObserver);
+    StreamObserver<GrpcServiceConfig> grpcServiceConfig = asyncEventService.onConnected(compensateStreamObserver);
+    grpcServiceConfig.onNext(serviceConfig);
+    compensateStreamObserver.waitConnected();
   }
 
   @Override
   public void onDisconnected() {
-    blockingEventService.onDisconnected(serviceConfig);
+      blockingEventService.onDisconnected(serviceConfig);
   }
 
   @Override
