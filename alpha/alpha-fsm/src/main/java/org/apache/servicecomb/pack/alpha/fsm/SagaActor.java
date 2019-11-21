@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import org.apache.servicecomb.pack.alpha.core.AlphaException;
+import org.apache.servicecomb.pack.alpha.core.CompensateAskFailedException;
+import org.apache.servicecomb.pack.alpha.core.OmegaDisconnectedException;
 import org.apache.servicecomb.pack.alpha.core.fsm.SuspendedType;
 import org.apache.servicecomb.pack.alpha.core.fsm.TxState;
 import org.apache.servicecomb.pack.alpha.core.fsm.event.base.BaseEvent;
@@ -502,6 +504,11 @@ public class SagaActor extends
     }catch (Exception ex){
       LOG.error("apply {}", event.getEvent(), ex);
       LOG.error(ex.getMessage(), ex);
+      if (ex instanceof CompensateAskFailedException) {
+        data.setSuspendedType(SuspendedType.COMPENSATE_FAILED);
+      } else if(ex instanceof OmegaDisconnectedException) {
+        data.setSuspendedType(SuspendedType.LOST_OMEGA_CONNECTION);
+      }
       beforeStop(event.getEvent(), SagaActorState.SUSPENDED, data);
       stop();
       //TODO 增加 SagaActor 处理失败指标
@@ -575,6 +582,8 @@ public class SagaActor extends
           LOG.error(e.getMessage(), e);
         }
         compensation(txEntity, data);
+      } else {
+        throw ex;
       }
     }
   }
