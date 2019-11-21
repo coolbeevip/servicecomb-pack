@@ -20,10 +20,10 @@ package org.apache.servicecomb.pack.omega.transaction.spring;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.servicecomb.pack.contract.grpc.ServerMeta;
-import org.apache.servicecomb.pack.omega.context.CallbackContext;
 import org.apache.servicecomb.pack.omega.context.IdGenerator;
 import org.apache.servicecomb.pack.omega.context.OmegaContext;
 import org.apache.servicecomb.pack.omega.transaction.AlphaResponse;
+import org.apache.servicecomb.pack.omega.transaction.CallbackContext;
 import org.apache.servicecomb.pack.omega.transaction.SagaMessageSender;
 import org.apache.servicecomb.pack.omega.transaction.TxEvent;
 import org.apache.servicecomb.pack.omega.transaction.tcc.DefaultParametersContext;
@@ -44,13 +44,13 @@ public class MessageConfig {
   }
 
   @Bean(name = "compensationContext")
-  CallbackContext recoveryCompensationContext(OmegaContext omegaContext) {
-    return new CallbackContext(omegaContext);
+  CallbackContext recoveryCompensationContext(OmegaContext omegaContext, SagaMessageSender sender) {
+    return new CallbackContext(omegaContext, sender);
   }
 
   @Bean(name = "coordinateContext")
-  CallbackContext coordinateContext(OmegaContext omegaContext) {
-    return new CallbackContext(omegaContext);
+  CallbackContext coordinateContext(OmegaContext omegaContext, SagaMessageSender sender) {
+    return new CallbackContext(omegaContext, sender);
   }
 
   @Bean

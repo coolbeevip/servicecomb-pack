@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.omega.context;
+package org.apache.servicecomb.pack.omega.transaction;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.servicecomb.pack.omega.context.OmegaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +31,11 @@ public class CallbackContext {
 
   private final Map<String, CallbackContextInternal> contexts = new ConcurrentHashMap<>();
   private final OmegaContext omegaContext;
+  private final SagaMessageSender sender;
 
-  public CallbackContext(OmegaContext omegaContext) {
+  public CallbackContext(OmegaContext omegaContext, SagaMessageSender sender) {
     this.omegaContext = omegaContext;
+    this.sender = sender;
   }
 
   public void addCallbackContext(String key, Method compensationMethod, Object target) {
@@ -49,11 +52,13 @@ public class CallbackContext {
       omegaContext.setLocalTxId(localTxId);
       contextInternal.callbackMethod.invoke(contextInternal.target, payloads);
       LOG.info("Callback transaction with global tx id [{}], local tx id [{}]", globalTxId, localTxId);
+      sender.send(new TxCompensateSucceedAckEvent(omegaContext.globalTxId(),omegaContext.localTxId(),omegaContext.globalTxId()));
     } catch (IllegalAccessException | InvocationTargetException e) {
       LOG.error(
           "Pre-checking for callback method " + contextInternal.callbackMethod.toString()
               + " was somehow skipped, did you forget to configure callback method checking on service startup?",
           e);
+      sender.send(new TxCompensateFailedAckEvent(omegaContext.globalTxId(),omegaContext.localTxId(),omegaContext.globalTxId()));
     } finally {
       omegaContext.setGlobalTxId(oldGlobalTxId);
       omegaContext.setLocalTxId(oldLocalTxId);

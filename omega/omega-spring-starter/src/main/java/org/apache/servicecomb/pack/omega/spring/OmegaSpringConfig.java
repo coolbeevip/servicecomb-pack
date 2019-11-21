@@ -28,13 +28,13 @@ import org.apache.servicecomb.pack.omega.connector.grpc.core.LoadBalanceContextB
 import org.apache.servicecomb.pack.omega.connector.grpc.core.TransactionType;
 import org.apache.servicecomb.pack.omega.connector.grpc.saga.SagaLoadBalanceSender;
 import org.apache.servicecomb.pack.omega.connector.grpc.tcc.TccLoadBalanceSender;
-import org.apache.servicecomb.pack.omega.context.CallbackContext;
 import org.apache.servicecomb.pack.omega.context.IdGenerator;
 import org.apache.servicecomb.pack.omega.context.OmegaContext;
 import org.apache.servicecomb.pack.omega.context.ServiceConfig;
 import org.apache.servicecomb.pack.omega.context.UniqueIdGenerator;
 import org.apache.servicecomb.pack.omega.format.KryoMessageFormat;
 import org.apache.servicecomb.pack.omega.format.MessageFormat;
+import org.apache.servicecomb.pack.omega.transaction.CallbackContext;
 import org.apache.servicecomb.pack.omega.transaction.MessageHandler;
 import org.apache.servicecomb.pack.omega.transaction.SagaMessageSender;
 import org.apache.servicecomb.pack.omega.transaction.tcc.DefaultParametersContext;
@@ -71,13 +71,13 @@ class OmegaSpringConfig {
   }
 
   @Bean(name = {"compensationContext"})
-  CallbackContext compensationContext(OmegaContext omegaContext) {
-    return new CallbackContext(omegaContext);
+  CallbackContext compensationContext(OmegaContext omegaContext, SagaMessageSender sender) {
+    return new CallbackContext(omegaContext, sender);
   }
 
   @Bean(name = {"coordinateContext"})
-  CallbackContext coordinateContext(OmegaContext omegaContext) {
-    return new CallbackContext(omegaContext);
+  CallbackContext coordinateContext(OmegaContext omegaContext, SagaMessageSender sender) {
+    return new CallbackContext(omegaContext, sender);
   }
 
   @Bean
