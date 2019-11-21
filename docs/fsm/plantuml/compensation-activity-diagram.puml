@@ -1,11 +1,19 @@
 @startuml
 start
-:开始补偿;
-if (成功?) then
-elseif (补偿失败)
-  :事务挂起;
-elseif (连接异常)
-  :事务挂起;
-endif
+:query Omega Instance list by serviceName;
+repeat
+  :get OmegaCallback by Omega instance;
+  :OmegaCallback.compensate();
+  if (succeed?) then (yes)
+    :COMPENSATED;
+    stop
+  else (no)
+    if (CompensateAskFailedException)
+      :SUSPENDED;
+    elseif (OmegaDisconnectedException)
+      :SUSPENDED;
+    endif
+  endif
+repeat while (more data?)
 stop
 @enduml
