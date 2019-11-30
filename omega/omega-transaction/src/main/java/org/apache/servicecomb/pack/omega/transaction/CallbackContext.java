@@ -31,9 +31,11 @@ public class CallbackContext {
 
   private final Map<String, CallbackContextInternal> contexts = new ConcurrentHashMap<>();
   private final OmegaContext omegaContext;
+  private final SagaMessageSender sender;
 
-  public CallbackContext(OmegaContext omegaContext) {
+  public CallbackContext(OmegaContext omegaContext, SagaMessageSender sender) {
     this.omegaContext = omegaContext;
+    this.sender = sender;
   }
 
   public void addCallbackContext(String key, Method compensationMethod, Object target) {
@@ -49,8 +51,10 @@ public class CallbackContext {
       omegaContext.setGlobalTxId(globalTxId);
       omegaContext.setLocalTxId(localTxId);
       contextInternal.callbackMethod.invoke(contextInternal.target, payloads);
+      sender.send(new TxCompensateAckSucceedEvent(omegaContext.globalTxId(),omegaContext.localTxId(),omegaContext.globalTxId()));
       LOG.info("Callback transaction with global tx id [{}], local tx id [{}]", globalTxId, localTxId);
     } catch (IllegalAccessException | InvocationTargetException e) {
+      sender.send(new TxCompensateAckFailedEvent(omegaContext.globalTxId(),omegaContext.localTxId(),omegaContext.globalTxId()));
       LOG.error(
           "Pre-checking for callback method " + contextInternal.callbackMethod.toString()
               + " was somehow skipped, did you forget to configure callback method checking on service startup?",

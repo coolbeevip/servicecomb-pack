@@ -77,6 +77,10 @@ public class OmegaEventSender {
     return blockingStub.onGetServerMeta(serviceConfig);
   }
 
+  public GrpcServiceConfig getServiceConfig() {
+    return serviceConfig;
+  }
+
   public void setOmegaCallbacks(
       Map<String, Map<String, OmegaCallback>> omegaCallbacks) {
     this.omegaCallbacks = omegaCallbacks;

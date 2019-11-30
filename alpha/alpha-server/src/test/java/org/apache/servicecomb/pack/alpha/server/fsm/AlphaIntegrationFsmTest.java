@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorSystem;
 import io.grpc.netty.NettyChannelBuilder;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.servicecomb.pack.alpha.core.OmegaCallback;
@@ -167,6 +168,16 @@ public class AlphaIntegrationFsmTest {
     omegaEventSender.getOmegaEventSagaSimulator().middleTxAbortedEvents(globalTxId, localTxId_1, localTxId_2).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
+
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;
@@ -191,6 +202,16 @@ public class AlphaIntegrationFsmTest {
     omegaEventSender.getOmegaEventSagaSimulator().lastTxAbortedEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
+
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;
@@ -217,6 +238,16 @@ public class AlphaIntegrationFsmTest {
     omegaEventSender.getOmegaEventSagaSimulator().receivedRemainingEventAfterFirstTxAbortedEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_2,localTxId_3).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
+
     await().atMost(5, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;
@@ -249,6 +280,14 @@ public class AlphaIntegrationFsmTest {
       }
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_2,localTxId_3).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
     await().atMost(5, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;
@@ -273,6 +312,14 @@ public class AlphaIntegrationFsmTest {
     final String localTxId_3 = UUID.randomUUID().toString();
     omegaEventSender.getOmegaEventSagaSimulator().sagaAbortedEventAfterAllTxEndedsEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
+    });
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2, localTxId_3).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
     });
     await().atMost(20, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
@@ -396,6 +443,14 @@ public class AlphaIntegrationFsmTest {
     omegaEventSender.getOmegaEventSagaSimulator().lastTxAbortedEventWithTxConcurrentEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;
@@ -419,6 +474,14 @@ public class AlphaIntegrationFsmTest {
     final String localTxId_3 = UUID.randomUUID().toString();
     omegaEventSender.getOmegaEventSagaSimulator().duplicateTxOnFailureEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
+    });
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
     });
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
@@ -454,11 +517,20 @@ public class AlphaIntegrationFsmTest {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
     //simulate omega connected
-    await().atMost(2, SECONDS).until(() -> {
+    await().atMost(5, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.getTxEntityMap().size()==3;
     });
     omegaEventSender.getOmegaCallbacks().put(serviceName[0], omegaInstance[0]);
+
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
 
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
@@ -486,6 +558,16 @@ public class AlphaIntegrationFsmTest {
     omegaEventSender.getOmegaEventSagaSimulator().lastTxAbortedEvents(globalTxId, localTxId_1, localTxId_2, localTxId_3).stream().forEach( event -> {
       omegaEventSender.getBlockingStub().onTxEvent(event);
     });
+
+    // Send a TxCompensateAckSucceedEvent after Alpha call compensation
+    OmegaCallback omegaCallback = omegaCallbacks.get(omegaEventSender.getServiceConfig().getServiceName())
+        .get(omegaEventSender.getServiceConfig().getInstanceId());
+    Arrays.asList(localTxId_1,localTxId_2).stream().forEach( localTxId_x -> {
+      await().atMost(2, SECONDS)
+          .until(() -> omegaCallback.isWaiting());
+      omegaEventSender.getBlockingStub().onTxEvent(omegaEventSender.getOmegaEventSagaSimulator().getTxCompensateAckSucceedEvent(globalTxId,localTxId_x));
+    });
+
     await().atMost(2, SECONDS).until(() -> {
       SagaData sagaData = SagaDataExtension.SAGA_DATA_EXTENSION_PROVIDER.get(system).getLastSagaData();
       return sagaData !=null && sagaData.isTerminated() && sagaData.getLastState()==SagaActorState.COMPENSATED;

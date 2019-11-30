@@ -178,6 +178,10 @@ public class OmegaEventSagaSimulator {
     return sagaEvents;
   }
 
+  public GrpcTxEvent getTxCompensateAckSucceedEvent(String globalTxId, String localTxId){
+    return txCompensateAckSucceedEvent(globalTxId, localTxId, globalTxId);
+  }
+
   private GrpcTxEvent sagaStartedEvent(String globalTxId) {
     return eventOf(EventType.SagaStartedEvent, globalTxId, globalTxId,
         null, new byte[0], "", 0, "",
@@ -236,6 +240,12 @@ public class OmegaEventSagaSimulator {
         0);
   }
 
+  public GrpcTxEvent txCompensateAckSucceedEvent(String globalTxId,
+      String localTxId, String parentTxId) {
+    return eventOf(EventType.TxCompensateAckSucceedEvent, globalTxId, localTxId,
+        parentTxId,  new byte[0], "", 0, "",
+        0);
+  }
   private GrpcTxEvent eventOf(EventType eventType,
       String globalTxId,
       String localTxId,

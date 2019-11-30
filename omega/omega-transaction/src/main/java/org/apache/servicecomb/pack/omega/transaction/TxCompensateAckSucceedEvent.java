@@ -15,20 +15,13 @@
  * limitations under the License.
  */
 
-package org.apache.servicecomb.pack.alpha.core;
+package org.apache.servicecomb.pack.omega.transaction;
 
-import org.apache.servicecomb.pack.alpha.core.fsm.CompensateAskType;
+import org.apache.servicecomb.pack.common.EventType;
+import org.apache.servicecomb.pack.omega.transaction.TxEvent;
 
-public interface OmegaCallback {
-  void compensate(TxEvent event);
-
-  default void disconnect() {
-  }
-
-  default void ask(CompensateAskType type) {
-  }
-
-  default boolean isWaiting() {
-    return false;
+public class TxCompensateAckSucceedEvent extends TxEvent {
+  public TxCompensateAckSucceedEvent(String globalTxId, String localTxId, String parentTxId) {
+    super(EventType.TxCompensateAckSucceedEvent, globalTxId, localTxId, parentTxId, "", 0, "", 0);
   }
 }

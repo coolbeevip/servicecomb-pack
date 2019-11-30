@@ -180,7 +180,7 @@ public class SagaIntegrationTest {
     assertNotNull(sagaData.getBeginTime());
     assertNotNull(sagaData.getEndTime());
     assertEquals(sagaData.getTxEntityMap().size(),3);
-    assertEquals(sagaData.getTxEntityMap().get(localTxId_1).getState(),TxState.COMPENSATED);
+    assertEquals(sagaData.getTxEntityMap().get(localTxId_1).getState(),TxState.COMPENSATED); // TODO NPE for CI
     assertEquals(sagaData.getTxEntityMap().get(localTxId_2).getState(),TxState.COMPENSATED);
     assertEquals(sagaData.getTxEntityMap().get(localTxId_3).getState(),TxState.FAILED);
   }
