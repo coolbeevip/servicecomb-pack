@@ -52,11 +52,11 @@ Feature: Alpha records transaction events
     When User Sean requests to book 1 cars and 1 rooms fail
 
     Then Alpha records the following events
-      | serviceName  | type               |
+      | serviceName  | type          |
       | booking | SagaStartedEvent   |
       | car     | TxStartedEvent     |
       | car     | TxEndedEvent       |
-      | booking | SagaAbortedEvent     |
+      | booking | SagaAbortedEvent   |
       | car     | TxCompensatedEvent |
 
     Then Car Service contains the following booking orders
@@ -81,11 +81,11 @@ Feature: Alpha records transaction events
       | booking | SagaStartedEvent   |
       | car     | TxStartedEvent     |
       | car     | TxEndedEvent       |
-      | hotel     | TxStartedEvent     |
-      | hotel     | TxEndedEvent       |
-      | booking | SagaAbortedEvent     |
-      | hotel     | TxCompensatedEvent |
+      | hotel   | TxStartedEvent     |
+      | hotel   | TxEndedEvent       |
+      | booking | SagaAbortedEvent   |
       | car     | TxCompensatedEvent |
+      | hotel   | TxCompensatedEvent |
 
     Then Car Service contains the following booking orders
       | id | name | amount | confirmed | cancelled |
@@ -158,7 +158,7 @@ Feature: Alpha records transaction events
       | car     | TxEndedEvent       |
       | hotel   | TxStartedEvent     |
       | hotel   | TxAbortedEvent     |
-      | booking | SagaAbortedEvent     |
+      | booking | SagaAbortedEvent   |
       | car     | TxCompensatedEvent |
 
     Then Car Service contains the following booking orders
