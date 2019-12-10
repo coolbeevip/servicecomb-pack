@@ -41,12 +41,12 @@ COMMITTED --> [*]
 
 SUSPENDED --> [*]
 
-IDEL: Map<localTxId,TxEntity> txEntityMap
-PARTIALLY_ACTIVE: Map<localTxId,TxEntity> txEntityMap
-PARTIALLY_COMMITTED: Map<localTxId,TxEntity> txEntityMap
-FAILED: Map<localTxId,TxEntity> txEntityMap
-COMMITTED: Map<localTxId,TxEntity> txEntityMap
-COMPENSATED: Map<localTxId,TxEntity> txEntityMap
-SUSPENDED: Map<localTxId,TxEntity> txEntityMap
+IDEL: Map<localTxId,TxEntity> txEntities
+PARTIALLY_ACTIVE: Map<localTxId,TxEntity> txEntities
+PARTIALLY_COMMITTED: Map<localTxId,TxEntity> txEntities
+FAILED: Map<localTxId,TxEntity> txEntities
+COMMITTED: Map<localTxId,TxEntity> txEntities
+COMPENSATED: Map<localTxId,TxEntity> txEntities
+SUSPENDED: Map<localTxId,TxEntity> txEntities
 
 @enduml

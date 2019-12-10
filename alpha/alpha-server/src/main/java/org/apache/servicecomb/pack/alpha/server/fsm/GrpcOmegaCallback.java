@@ -20,6 +20,7 @@ package org.apache.servicecomb.pack.alpha.server.fsm;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import java.lang.invoke.MethodHandles;
+import java.util.concurrent.TimeUnit;
 import org.apache.servicecomb.pack.alpha.core.OmegaCallback;
 import org.apache.servicecomb.pack.alpha.core.TxEvent;
 import org.apache.servicecomb.pack.alpha.core.exception.CompensateAckFailedException;
@@ -41,6 +42,7 @@ class GrpcOmegaCallback implements OmegaCallback {
 
   @Override
   public void compensate(TxEvent event) {
+
     compensateAckCountDownLatch = new CompensateAckCountDownLatch(1);
     try {
       GrpcCompensateCommand command = GrpcCompensateCommand.newBuilder()
@@ -51,7 +53,7 @@ class GrpcOmegaCallback implements OmegaCallback {
           .setPayloads(ByteString.copyFrom(event.payloads()))
           .build();
       observer.onNext(command);
-      compensateAckCountDownLatch.await();
+      compensateAckCountDownLatch.await(10, TimeUnit.SECONDS);
       if (compensateAckCountDownLatch.getType() == CompensateAckType.Disconnected) {
         throw new CompensateConnectException("Omega connect exception");
       }else{
