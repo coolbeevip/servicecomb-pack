@@ -535,7 +535,7 @@ public class AlphaIntegrationWithRandomPortTest {
       String compensationMethod,
       int timeout,
       String retryMethod,
-      int retries) {
+      int forwardRetries) {
 
     return GrpcTxEvent.newBuilder()
         .setServiceName(serviceName)
@@ -548,7 +548,7 @@ public class AlphaIntegrationWithRandomPortTest {
         .setCompensationMethod(compensationMethod)
         .setTimeout(timeout)
         .setRetryMethod(retryMethod)
-        .setRetries(retries)
+        .setForwardRetries(forwardRetries)
         .setPayloads(ByteString.copyFrom(payloads))
         .build();
   }

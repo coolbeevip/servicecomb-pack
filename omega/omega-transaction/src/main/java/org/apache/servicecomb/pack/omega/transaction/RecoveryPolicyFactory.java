@@ -17,6 +17,8 @@
 
 package org.apache.servicecomb.pack.omega.transaction;
 
+import org.apache.servicecomb.pack.omega.transaction.annotations.Compensable;
+
 public class RecoveryPolicyFactory {
   private static final RecoveryPolicy DEFAULT_RECOVERY = new DefaultRecovery();
 
@@ -27,7 +29,7 @@ public class RecoveryPolicyFactory {
    * If retries > 0, it will use the forward recovery and retry the given times at most.
    * If retries == -1, it will use the forward recovery and retry forever until interrupted.
    */
-  static RecoveryPolicy getRecoveryPolicy(int retries) {
-    return retries != 0 ? FORWARD_RECOVERY : DEFAULT_RECOVERY;
+  static RecoveryPolicy getRecoveryPolicy(Compensable compensable) {
+    return compensable.forwardRetries() > 0 ? FORWARD_RECOVERY : DEFAULT_RECOVERY;
   }
 }

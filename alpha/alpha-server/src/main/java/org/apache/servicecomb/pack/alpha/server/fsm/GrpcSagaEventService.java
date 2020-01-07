@@ -137,7 +137,8 @@ public class GrpcSagaEventService extends TxEventServiceImplBase {
           .parentTxId(message.getParentTxId().isEmpty() ? null : message.getParentTxId())
           .compensationMethod(message.getCompensationMethod())
           .retryMethod(message.getRetryMethod())
-          .retries(message.getRetries())
+          .reverseRetries(message.getReverseRetries())
+          .forwardRetries(message.getForwardRetries())
           .createTime(new Date())
           .payloads(message.getPayloads().toByteArray()).build();
     } else if (message.getType().equals(EventType.TxEndedEvent.name())) {

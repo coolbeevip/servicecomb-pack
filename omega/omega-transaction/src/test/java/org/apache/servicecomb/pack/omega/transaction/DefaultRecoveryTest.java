@@ -131,7 +131,7 @@ public class DefaultRecoveryTest {
     assertThat(startedEvent.localTxId(), is(localTxId));
     assertThat(startedEvent.parentTxId(), is(parentTxId));
     assertThat(startedEvent.type(), is(EventType.TxStartedEvent));
-    assertThat(startedEvent.retries(), is(0));
+    assertThat(startedEvent.forwardRetries(), is(0));
     assertThat(startedEvent.retryMethod(), is(""));
 
     TxEvent endedEvent = messages.get(1);
@@ -159,7 +159,7 @@ public class DefaultRecoveryTest {
     assertThat(startedEvent.localTxId(), is(localTxId));
     assertThat(startedEvent.parentTxId(), is(parentTxId));
     assertThat(startedEvent.type(), is(EventType.TxStartedEvent));
-    assertThat(startedEvent.retries(), is(0));
+    assertThat(startedEvent.forwardRetries(), is(0));
     assertThat(startedEvent.retryMethod(), is(""));
 
     TxEvent abortedEvent = messages.get(1);
@@ -190,10 +190,12 @@ public class DefaultRecoveryTest {
 
   @Test
   public void recordRetryMethodWhenRetriesIsSet() throws Throwable {
-    int retries = new Random().nextInt(Integer.MAX_VALUE - 1) + 1;
-    when(compensable.forwardRetries()).thenReturn(retries);
+    int forwardRetries = new Random().nextInt(Integer.MAX_VALUE - 1) + 1;
+    int reverseRetries = new Random().nextInt(Integer.MAX_VALUE - 1) + 1;
+    when(compensable.forwardRetries()).thenReturn(forwardRetries);
+    when(compensable.reverseRetries()).thenReturn(reverseRetries);
 
-    recoveryPolicy.apply(joinPoint, compensable, interceptor, omegaContext, parentTxId, retries);
+    recoveryPolicy.apply(joinPoint, compensable, interceptor, omegaContext, parentTxId, forwardRetries);
 
     TxEvent startedEvent = messages.get(0);
 
@@ -201,7 +203,8 @@ public class DefaultRecoveryTest {
     assertThat(startedEvent.localTxId(), is(localTxId));
     assertThat(startedEvent.parentTxId(), is(parentTxId));
     assertThat(startedEvent.type(), is(EventType.TxStartedEvent));
-    assertThat(startedEvent.retries(), is(retries));
+    assertThat(startedEvent.forwardRetries(), is(forwardRetries));
+    assertThat(startedEvent.reverseRetries(), is(reverseRetries));
     assertThat(startedEvent.retryMethod(), is(this.getClass().getDeclaredMethod("doNothing").toString()));
   }
 

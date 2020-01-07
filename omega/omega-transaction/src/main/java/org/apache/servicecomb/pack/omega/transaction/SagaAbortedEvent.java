@@ -26,7 +26,7 @@ public class SagaAbortedEvent extends TxEvent {
   private static final int PAYLOADS_MAX_LENGTH = 10240;
 
   public SagaAbortedEvent(String globalTxId, String localTxId, String parentTxId, String compensationMethod, Throwable throwable) {
-    super(EventType.SagaAbortedEvent, globalTxId, localTxId, parentTxId, compensationMethod, 0, "", 0,
+    super(EventType.SagaAbortedEvent, globalTxId, localTxId, parentTxId, compensationMethod, 0, "", 0, 0,
         stackTrace(throwable));
   }
 

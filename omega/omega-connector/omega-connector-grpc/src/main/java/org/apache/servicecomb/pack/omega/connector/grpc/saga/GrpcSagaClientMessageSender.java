@@ -19,8 +19,6 @@ package org.apache.servicecomb.pack.omega.connector.grpc.saga;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
-import io.grpc.stub.StreamObserver;
-import java.lang.invoke.MethodHandles;
 import org.apache.servicecomb.pack.contract.grpc.ServerMeta;
 import org.apache.servicecomb.pack.omega.connector.grpc.core.LoadBalanceContext;
 import org.apache.servicecomb.pack.omega.context.ServiceConfig;
@@ -37,8 +35,6 @@ import org.apache.servicecomb.pack.contract.grpc.GrpcTxEvent.Builder;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc.TxEventServiceBlockingStub;
 import org.apache.servicecomb.pack.contract.grpc.TxEventServiceGrpc.TxEventServiceStub;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GrpcSagaClientMessageSender implements SagaMessageSender {
 
@@ -116,7 +112,8 @@ public class GrpcSagaClientMessageSender implements SagaMessageSender {
         .setTimeout(event.timeout())
         .setCompensationMethod(event.compensationMethod())
         .setRetryMethod(event.retryMethod() == null ? "" : event.retryMethod())
-        .setRetries(event.retries())
+        .setForwardRetries(event.forwardRetries())
+        .setReverseRetries(event.reverseRetries())
         .setPayloads(payloads);
 
     return builder.build();

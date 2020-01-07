@@ -553,7 +553,7 @@ public class AlphaIntegrationTest {
       String compensationMethod,
       int timeout,
       String retryMethod,
-      int retries) {
+      int forwardRetries) {
 
     return GrpcTxEvent.newBuilder()
         .setServiceName(serviceName)
@@ -566,7 +566,7 @@ public class AlphaIntegrationTest {
         .setCompensationMethod(compensationMethod)
         .setTimeout(timeout)
         .setRetryMethod(retryMethod)
-        .setRetries(retries)
+        .setForwardRetries(forwardRetries)
         .setPayloads(ByteString.copyFrom(payloads))
         .build();
   }
