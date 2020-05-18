@@ -1,4 +1,5 @@
 # Pack | [中文](README_ZH.md) [![Build Status](https://travis-ci.org/apache/servicecomb-pack.svg?branch=master)](https://travis-ci.org/apache/servicecomb-pack?branch=master) [![Coverage Status](https://coveralls.io/repos/github/apache/servicecomb-pack/badge.svg?branch=master)](https://coveralls.io/github/apache/servicecomb-pack?branch=master)[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.servicecomb.pack/pack/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Corg.apache.servicecomb.pack) [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=servicecomb-pack&metric=alert_status)](https://sonarcloud.io/dashboard?id=servicecomb-pack) [![Gitter](https://img.shields.io/badge/ServiceComb-Gitter-ff69b4.svg)](https://gitter.im/ServiceCombUsers/Saga)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoolbeevip%2Fservicecomb-pack.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoolbeevip%2Fservicecomb-pack?ref=badge_shield)
 Apache ServiceComb Pack is an eventually data consistency solution for micro-service applications.
 
 ## Features
@@ -104,6 +105,9 @@ See [Pull Request Guide](http://servicecomb.apache.org/developers/submit-codes/)
 
 ## License
 Licensed under an [Apache 2.0 license](https://github.com/apache/servicecomb-pack/blob/master/LICENSE).
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcoolbeevip%2Fservicecomb-pack.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcoolbeevip%2Fservicecomb-pack?ref=badge_large)
 
 ## Export Notice
 
